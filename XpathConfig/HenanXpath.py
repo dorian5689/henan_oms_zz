@@ -26,6 +26,10 @@ henan_ele_dict = {
     'login_button': 'x://*[@id="app"]/div/div/form/div[6]/div/button',
     # 点击oms按钮
     'oms_button': 'x://*[@id="app"]/section/section/div/div/div/div/div[4]/div[2]/div/div/div/div/div/div[1]',
+
+
+    # 收报负荷
+    'report_load': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/div/span',
     # 点击收报负荷-机组日实际发电量
     'report_load_button_dl': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[1]/a/li/span',
     # 上上报日期
@@ -42,20 +46,33 @@ henan_ele_dict = {
 
     # 点击收报负荷-储能
     'report_load_button_cn': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[position()=last()]/a/li/span',
+
     # 储能日最大充电电力
     'store_energy_max_charge_power_day': 'x://*[@id="formtable"]/tbody/tr[4]/td[2]/span[1]/span/input',
-    # 储能最大充电电力
-    'store_energy_max_charge_power': 'x://*[@id="formtable"]/tbody/tr[5]/td[2]/span[1]/span/input',
-    # 储能最大放电电力
-    'store_energy_max_discharge_power': 'x://*[@id="formtable"]/tbody/tr[6]/td[2]/span[1]/span/input',
+    # 储能日最大放电电力
+    'store_energy_max_discharge_power_day': 'x://*[@id="formtable"]/tbody/tr[5]/td[2]/span[1]/span/input',
     # 储能日充电量
-    'store_energy_day_charge_power': 'x://*[@id="formtable"]/tbody/tr[7]/td[2]/span[1]/span/input',
+    'store_energy_day_charge_power': 'x://*[@id="formtable"]/tbody/tr[6]/td[2]/span[1]/span/input',
     # 储能日放电量
-    'store_energy_day_discharge_power': 'x://*[@id="formtable"]/tbody/tr[8]/td[2]/span[1]/span/input',
+    'store_energy_day_discharge_power': 'x://*[@id="formtable"]/tbody/tr[7]/td[2]/span[1]/span/input',
     # 储能日充电次数
-    'store_energy_day_charge_power_times': 'x://*[@id="formtable"]/tbody/tr[9]/td[2]/span[1]/span/input',
+    'store_energy_day_charge_power_times': 'x://*[@id="formtable"]/tbody/tr[8]/td[2]/span[1]/span/input',
     # 储能日放电次数
-    'store_energy_day_discharge_power_times': 'x://*[@id="formtable"]/tbody/tr[10]/td[2]/span[1]/span/input',
+    'store_energy_day_discharge_power_times': 'x://*[@id="formtable"]/tbody/tr[9]/td[2]/span[1]/span/input',
+
+    # 飞翔储能三期
+    # 储能日最大充电电力
+    'store_energy_max_charge_power_day3': 'x://*[@id="formtable"]/tbody/tr[12]/td[2]/span[1]/span/input',
+    # 储能日最大放电电力
+    'store_energy_max_discharge_power_day3': 'x://*[@id="formtable"]/tbody/tr[13]/td[2]/span[1]/span/input',
+    # 储能日充电量
+    'store_energy_day_charge_power3': 'x://*[@id="formtable"]/tbody/tr[6]/td[14]/span[1]/span/input',
+    # 储能日放电量
+    'store_energy_day_discharge_power3': 'x://*[@id="formtable"]/tbody/tr[15]/td[2]/span[1]/span/input',
+    # 储能日充电次数
+    'store_energy_day_charge_power_times3': 'x://*[@id="formtable"]/tbody/tr[16]/td[2]/span[1]/span/input',
+    # 储能日放电次数
+    'store_energy_day_discharge_power_times3': 'x://*[@id="formtable"]/tbody/tr[17]/td[2]/span[1]/span/input',
     # 上报日期
     'report_date': 'x://*[@id="1$cell$2"]/div',
     # 上报状态

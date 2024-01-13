@@ -43,7 +43,6 @@ class FindExeTools(object):
         '''
         PT = ProcessCure()
         time.sleep(5)
-
         PT.admin_kill_process(process_name)
 
         self.log.info(F'查找当前运行的{process_name},并结束进程')
@@ -58,7 +57,9 @@ class FindExeTools(object):
         # pag.press("enter")
         # time.sleep(2)
         import subprocess
-        process_name = F'..{os.sep}ExeSoft{os.sep}iscpclient{os.sep}bin{os.sep}iscpclient.exe'
+        process_name =F'C:{os.sep}Program Files{os.sep}iscpclient{os.sep}bin{os.sep}iscpclient.exe'
+        if not  os.path.isfile(process_name):
+            process_name = F'..{os.sep}ExeSoft{os.sep}iscpclient{os.sep}bin{os.sep}iscpclient.exe'
         subprocess.Popen(process_name)
         time.sleep(3)
         res = gw.getWindowsWithTitle('安全接入网关SDK')[0]
