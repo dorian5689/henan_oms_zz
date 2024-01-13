@@ -350,12 +350,12 @@ class RunSxz(object):
                 self.report_load_cn(table0, henan_oms_data)
         except:
             pass
-        try:
-            if userid in [10]:
-                henan_oms_data3 = self.henan_data3()
-                self.report_load_cn3(table0, henan_oms_data, henan_oms_data3)
-        except Exception as e:
-            pass
+        # try:
+        #     if userid in [10]:
+        #         henan_oms_data3 = self.henan_data3()
+        #         self.report_load_cn3(table0, henan_oms_data, henan_oms_data3)
+        # except Exception as e:
+        #     pass
 
         try:
             self.exit_username_oms(table0)
@@ -640,6 +640,8 @@ def close_chrome():
 
 if __name__ == '__main__':
     run_zz_jk_time()
+
+
 
     # print(F"自动化程序填报运行中,请勿关闭!")
     # # print(F"保佑,保佑,正常运行!")
