@@ -37,7 +37,6 @@ class ReadyLogin(object):
 
     def select_uk(self):
         CU = Change_Uk_Info()
-
         list_port = CU.select_comports()
         if list_port is None:
             return None, None
@@ -49,7 +48,7 @@ class ReadyLogin(object):
 
         import subprocess
         subprocess.Popen(exe_path)
-        time.sleep(6)
+        time.sleep(1)
         CU.select_use_device()
 
         import pygetwindow as gw
@@ -88,16 +87,16 @@ class ReadyLogin(object):
             # print("前一天的日期为：", previous_day)
             select_exit_true = F"SELECT 是否已完成 FROM data_oms where 电场名称='{data_info[0][2]}' AND 日期='{previous_day}'"
             res_exit_ture = MysqlCurd(new_nanfang).query_sql(select_exit_true)
-            if res_exit_ture[0][0]==1:
+            if res_exit_ture[0][0] == 1:
                 # print(F'已上报:{data_info[0][2]}')
                 report_li.append(data_info[0][5])
                 continue
             if res:
-                time.sleep(3)
+                time.sleep(2)
                 res.maximize()
                 time.sleep(1)
                 CU.all_button()
-                time.sleep(2)
+                time.sleep(1)
                 CU.radio_switch(f'{i}')
                 time.sleep(3)
                 res.minimize()
@@ -113,7 +112,7 @@ class ReadyLogin(object):
                 set_mac = SetMac()
                 new_mac = mac_address
                 set_mac.run(new_mac)
-                time.sleep(6)
+                time.sleep(1)
                 try:
                     FT = FindExeTools()
                     FT.find_soft()
@@ -127,19 +126,22 @@ class ReadyLogin(object):
                     current_time = datetime.now()
                     # 格式化当前时间
                     start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                    RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
                     try:
+                        RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
                         run_num = RB.run_sxz(userid)
+                        print(F'运行一次的值:{run_num}')
                         if run_num == 1:
                             continue
                     except Exception as e:
-                        run_times = 0
-                        for _ in range(3):
-                            run_num = RB.run_sxz(userid)
-                            if run_num < 1:
-                                run_times += 1
-                            if run_times > 3:
-                                return
+                        pass
+                        # run_times = 0
+                        # for _ in range(3):
+                        #     RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
+                        #     run_num = RB.run_sxz(userid)
+                        #     if run_num < 1:
+                        #         run_times += 1
+                        #     if run_times > 3:
+                        #         return
                         print(f'已经运行了一次{e}')
                 except Exception as e:
                     print(F'主函数问题Q')
@@ -231,14 +233,21 @@ class RunSxz(object):
         try:
             # self.page.ele(F'{henan_ele_dict.get("again_post")}')
             # self.page.clear_cache(cookies=False)
-            time.sleep(2)
-            self.page.refresh()
+            # time.sleep(2)
+            time.sleep(1)
             self.page.get(self.login)
-            self.page.refresh()
-            self.page.wait
             time.sleep(3)
+            # self.page.refresh()
+            # self.page.wait
+            # time.sleep(3)
+            try:
+                if "风险防控系统" in self.page.html:
+                    self.page.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
+                    self.page.ele('x://html/body/ul/li[1]/span').click()
+                    self.page.ele('x://html/body/div[2]/div/div[3]/button[2]/span').click()
 
-
+            except:
+                pass
             try:
                 if "点击详情" in self.page.html:
                     self.page.ele(F'{henan_ele_dict.get("details-button")}').click()
@@ -251,9 +260,8 @@ class RunSxz(object):
                     self.exit_username_login()
                 except Exception as e:
                     pass
-            time.sleep(3)
+            time.sleep(5)
             self.page(F'{henan_ele_dict.get("input_text")}').input(self.username)
-            time.sleep(2)
             self.page(F'{henan_ele_dict.get("input_password")}').input(self.password)
             time.sleep(2)
 
@@ -289,56 +297,88 @@ class RunSxz(object):
         except:
             pass
         cap.get_screenshot(path=img_path, name=img_name, )
-        ocr = ddddocr.DdddOcr()
+        ocr = ddddocr.DdddOcr(beta=True)
         with open(img_path, 'rb') as f:
             img_bytes = f.read()
         cap_text = ocr.classification(img_bytes)
         print(f"验证码:{cap_text}")
         # 验证码长度不等于5或者包含中文字符或者不包含大写字母再次运行
-        if len(cap_text) != 5 or bool(
-                re.search(u'[\u4e00-\u9fa5]', cap_text)):
-            print(F' 验证码:{cap_text}')
-            for num in range(20):
-                cap_text = self.send_code()
-                time.sleep(2)
-                if len(cap_text) == 5 and re.match('^[a-zA-Z0-9]+$', cap_text):
-                    return cap_text
-        return cap_text
+        if len(cap_text) == 5 and cap_text.isalnum() and cap_text.islower():
+            print(F'验证码有误:{cap_text}')
+            return cap_text
+        else:
+            cap_text = self.send_code()
+            print(F'再次验证:{cap_text}')
+            return cap_text
+    def welcome_user(self,):
+        if "欢迎登录" in self.page.html:
+            cap_text = self.send_code()
+            time.sleep(3)
+            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+            time.sleep(3)
 
+            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
+            time.sleep(3)
+            self.page.wait
+            return True
+        else:
+            return False
     def run_sxz(self, userid):
         cap_text = self.chrome_login_page(userid)
+        print(F'已经识别的验证码:{cap_text}')
+        time.sleep(3)
         self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
-
+        time.sleep(3)
         self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
         time.sleep(3)
         self.page.wait
+        for _ in range(3):
+            num_ = self.welcome_user()
+            if num_ == True:
+                continue
 
-        if "欢迎登陆" in self.page.html:
-            cap_text = self.send_code()
-            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
-            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+
+
+
+
+            # 登录按钮
         if "验证码" in self.page.html:
+            time.sleep(3)
+
             cap_text = self.send_code()
+            time.sleep(3)
+
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+            self.page.wait
+
         if "解析密码错误" in self.page.html:
+            time.sleep(3)
+
             cap_text = self.send_code()
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+            self.page.wait
+
         if "风险防控系统" not in self.page.html:
+
             cap_text = self.send_code()
+            time.sleep(3)
+
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
+            self.page.wait
 
         # if "改" in self.page.html:
         #     cap_text = self.send_code()
         #     self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
         #     self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
         henan_oms_data = self.henan_data()
-
-        self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
         time.sleep(6)
+        self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
         self.page.wait
+        time.sleep(3)
+
         #
         table0 = self.page.get_tab(0)
         try:
@@ -350,18 +390,20 @@ class RunSxz(object):
                 self.report_load_cn(table0, henan_oms_data)
         except:
             pass
-        # try:
-        #     if userid in [10]:
-        #         henan_oms_data3 = self.henan_data3()
-        #         self.report_load_cn3(table0, henan_oms_data, henan_oms_data3)
-        # except Exception as e:
-        #     pass
+        try:
+            if userid in [10]:
+                henan_oms_data3 = self.henan_data3()
+                self.report_load_cn3(table0, henan_oms_data, henan_oms_data3)
+        except Exception as e:
+            pass
 
         try:
             self.exit_username_oms(table0)
             # table0.close()
             try:
                 self.page.quit()
+                time.sleep(1)
+
                 print("网页退出！")
             except:
                 pass
@@ -376,7 +418,7 @@ class RunSxz(object):
         try:
             res = self.page.ele('x://*[@id="app"]/section/header/div/div[2]/div/div/span').click()
         except:
-            res = 0
+            return
 
         if res:
             self.page.ele('x:/html/body/ul/li[1]/span').click()
@@ -393,8 +435,11 @@ class RunSxz(object):
         table0.ele('x://html/body/ul/li[4]/span').click()
         try:
             table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
+            time.sleep(1)
         except:
             table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
+            time.sleep(1)
+
 
         time.sleep(1)
 
@@ -403,6 +448,20 @@ class RunSxz(object):
         print(F'点击了收报负荷！')
         table0.ele(F'{henan_ele_dict.get("report_load_button_dl")}').click()
         self.page.wait
+        # todo 这里是测试数据是否准确
+        fdl = henan_oms_data[0]
+        swdl = henan_oms_data[1]
+        qdl = henan_oms_data[2]
+        message_dl = {
+            "msgtype": "markdown",
+            "markdown": {
+                "title": "OMS推送",
+                "text":
+                    F'第{self.wfname_id}个场站:{self.wfname}--已上报--电量--郑州集控<br>'
+                    F'发电量:{fdl}<br>上网电量:{swdl}<br>弃电量:{qdl}<br>',
+            }
+        }
+        # self.send_ding_dl_true_or_false(table0, message_dl=message_dl)
 
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             self.send_ding_dl(table0)
@@ -417,8 +476,8 @@ class RunSxz(object):
         from DingInfo.DingBotMix import DingApiTools
         # 天润
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
-        # DAT.push_message(self.jf_token, self.message_dl)
-        # DAT.send_file(F'{save_wind_wfname}', 0)
+        DAT.push_message(self.jf_token, self.message_dl)
+        DAT.send_file(F'{save_wind_wfname}', 0)
 
         # 奈卢斯
         DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
@@ -428,13 +487,62 @@ class RunSxz(object):
 
         self.update_mysql()
 
+    def send_ding_dl_true_or_false(self, table0, message_dl):
+        time.sleep(3)
+        save_wind_wfname = self.save_pic(table0)
+        from DingInfo.DingBotMix import DingApiTools
+        # 天润
+        DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
+        DAT.push_message(self.jf_token, message_dl)
+        DAT.send_file(F'{save_wind_wfname}', 0)
+
+        # 奈卢斯
+        DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                              chatid_value=self.nls_chatid)
+        DATNLS.push_message(self.nls_token, message_dl)
+        DATNLS.send_file(F'{save_wind_wfname}', 0)
+
+        # self.update_mysql()
+    def send_ding_cn_true_or_false(self, table0, message_cn):
+        time.sleep(3)
+
+        save_wind_wfname = self.save_pic(table0)
+        from DingInfo.DingBotMix import DingApiTools
+        # 天润
+        DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
+        DAT.push_message(self.jf_token, message_cn)
+        DAT.send_file(F'{save_wind_wfname}', 0)
+
+        # 奈卢斯
+        DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                              chatid_value=self.nls_chatid)
+        DATNLS.push_message(self.nls_token, message_cn)
+        DATNLS.send_file(F'{save_wind_wfname}', 0)
+
+        # self.update_mysql()
+
+    def send_ding_cn3_true_or_false(self, table0, message_cn3):
+        time.sleep(3)
+
+        save_wind_wfname = self.save_pic(table0)
+        from DingInfo.DingBotMix import DingApiTools
+        # 天润
+        DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
+        DAT.push_message(self.jf_token, message_cn3)
+        DAT.send_file(F'{save_wind_wfname}', 0)
+
+        # 奈卢斯
+        DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                              chatid_value=self.nls_chatid)
+        DATNLS.push_message(self.nls_token, message_cn3)
+        DATNLS.send_file(F'{save_wind_wfname}', 0)
     def send_ding_cn(self, table0):
         save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
         # 天润
         DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
-        # DAT.push_message(self.jf_token, self.message_cn)
-        # DAT.send_file(F'{save_wind_wfname}', 0)
+        DAT.push_message(self.jf_token, self.message_cn)
+        DAT.send_file(F'{save_wind_wfname}', 0)
 
         # 奈卢斯
         DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
@@ -469,34 +577,140 @@ class RunSxz(object):
         # im.save(save_wind_wfname)
         return save_wind_wfname
 
+    def report_load_cn_00000(self, table0, henan_oms_data):
+        time.sleep(2)
+
+        # table0.ele(F'{henan_ele_dict.get("report_load")}').click()
+        table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
+        # todo 这里是测试储能数据是否准确
+        cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
+        cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
+        cnrcdl = henan_oms_data[5]# 储能日充电量
+        cnrfdl = henan_oms_data[6]#储能日放电量
+        cnrcdcs= henan_oms_data[7]#储能日充电次数
+        cnrfdcs = henan_oms_data[8]#储能日放电次数
+        message_cn = {
+            "msgtype": "markdown",
+            "markdown": {
+                "title": "OMS推送",
+                "text":
+                    F'第{self.wfname_id}个场站:{self.wfname}--已上报--储能--郑州集控<br>'
+                    F'储能日最大充电电力:{cnrzdcddl}<br>储能日放电量:{cnrzdfddl}<br>'
+                    F'储能日充电量:{cnrcdl}<br>储能日最大放电电力:{cnrfdl}<br>'
+                    F'储能日充电次数:{cnrcdcs}<br>储能日放电次数:{cnrfdcs}<br>'
+
+            }
+        }
+        # self.send_ding_cn_true_or_false(table0, message_cn=message_cn)
+        # if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
+        #     time.sleep(5)
+        #     self.send_ding_cn(table0)
+        # else:
+        #     table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(
+        #         F'{float(henan_oms_data[3])}\ue007')
+        #     table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power_day")}').input(
+        #         F'{henan_oms_data[4]}\ue007')
+        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(
+        #         F'{henan_oms_data[5]}\ue007')
+        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(
+        #         F'{int(henan_oms_data[6])}\ue007')
+        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(
+        #         F'{int(henan_oms_data[7])}\ue007')
+        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
+        #         F'{int(henan_oms_data[8])}\ue007')
+        #     self.upload_button_cn(table0)
     def report_load_cn(self, table0, henan_oms_data):
         time.sleep(2)
 
         # table0.ele(F'{henan_ele_dict.get("report_load")}').click()
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
-        time.sleep(3)
-        if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
-            time.sleep(5)
-            self.send_ding_cn(table0)
-        else:
-            table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(
-                F'{float(henan_oms_data[3])}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power_day")}').input(
-                F'{henan_oms_data[4]}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(
-                F'{henan_oms_data[5]}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(
-                F'{int(henan_oms_data[6])}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(
-                F'{int(henan_oms_data[7])}\ue007')
-            table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
-                F'{int(henan_oms_data[8])}\ue007')
-            self.upload_button_cn(table0)
+        # todo 这里是测试储能数据是否准确
+        cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
+        cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
+        cnrcdl = henan_oms_data[5]# 储能日充电量
+        cnrfdl = henan_oms_data[6]#储能日放电量
+        cnrcdcs= henan_oms_data[7]#储能日充电次数
+        cnrfdcs = henan_oms_data[8]#储能日放电次数
+        message_cn = {
+            "msgtype": "markdown",
+            "markdown": {
+                "title": "OMS推送",
+                "text":
+                    F'第{self.wfname_id}个场站:{self.wfname}--已上报--储能--郑州集控<br>'
+                    F'储能日最大充电电力:{cnrzdcddl}<br>储能日最大放电电力:{cnrzdfddl}<br>'
+                    F'储能日充电量:{cnrcdl}<br>储能日放电量:{cnrfdl}<br>'
+                    F'储能日充电次数:{cnrcdcs}<br>储能日放电次数:{cnrfdcs}<br>'
+
+            }
+        }
+        # self.send_ding_cn_true_or_false(table0, message_cn=message_cn)
+
+        #
+        cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
+        cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
+        cnrcdl = henan_oms_data[5]# 储能日充电量
+        cnrfdl = henan_oms_data[6]#储能日放电量
+        cnrcdcs= henan_oms_data[7]#储能日充电次数
+        cnrfdcs = henan_oms_data[8]#储能日放电次数
+        table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(
+            F'{float(henan_oms_data[3])}\ue007')
+        table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power_day")}').input(
+            F'{henan_oms_data[4]}\ue007')
+        table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(
+            F'{henan_oms_data[5]}\ue007')
+
+        table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(
+            F'{henan_oms_data[6]}\ue007')
+
+        table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(
+            F'{int(henan_oms_data[7])}\ue007')
+        table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
+            F'{int(henan_oms_data[8])}\ue007')
+        self.upload_button_cn(table0)
 
     def report_load_cn3(self, table0, henan_oms_data, henan_oms_data3):
         time.sleep(2)
 
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
+
+        # todo 这里是测试储能数据是否准确
+        cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
+        cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
+        cnrcdl = henan_oms_data[5]# 储能日充电量
+        cnrfdl = henan_oms_data[6]#储能日放电量
+        cnrcdcs= henan_oms_data[7]#储能日充电次数
+        cnrfdcs = henan_oms_data[8]#储能日放电次数
+
+        # todo 这里是测试储能3期数数据是否准确
+        cnrzdcddl3 = henan_oms_data3[3]# 储能日最大充电电力
+        cnrzdfddl3 = henan_oms_data3[4] # 储能日最大放电电力
+        cnrcdl3 = henan_oms_data3[5]# 储能日充电量
+        cnrfdl3 = henan_oms_data3[6]#储能日放电量
+        cnrcdcs3= henan_oms_data3[7]#储能日充电次数
+        cnrfdcs3 = henan_oms_data3[8]#储能日放电次数
+        message_cn3 = {
+            "msgtype": "markdown",
+            "markdown": {
+                "title": "OMS推送",
+                "text":
+                    F'第{self.wfname_id}个场站:{self.wfname}--已上报--储能--郑州集控<br>'
+                    F'储能日最大充电电力:{cnrzdcddl}<br>储能日最大放电电力:{cnrzdfddl}<br>'
+                    F'储能日充电量:{cnrcdl}<br>储能日放电量:{cnrfdl}<br>'
+                    F'储能日充电次数:{cnrcdcs}<br>储能日放电次数:{cnrfdcs}<br>'
+                    F'第二行数据<br>'
+                    F'储能日最大充电电力:{cnrzdcddl3}<br>储能日最大放电电力:{cnrzdfddl3}<br>'
+                    F'储能日充电量:{cnrcdl3}<br>储能日放电量:{cnrfdl3}<br>'
+                    F'储能日充电次数:{cnrcdcs3}<br>储能日放电次数:{cnrfdcs3}<br>'
+
+
+
+
+            }
+        }
+        # self.send_ding_cn3_true_or_false(table0, message_cn3=message_cn3)
+        # pass
+
+
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             time.sleep(5)
             self.send_ding_cn(table0)
@@ -509,7 +723,7 @@ class RunSxz(object):
             table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(
                 F'{henan_oms_data[5]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(
-                F'{int(henan_oms_data[6])}\ue007')
+                F'{henan_oms_data[6]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(
                 F'{int(henan_oms_data[7])}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
@@ -520,13 +734,13 @@ class RunSxz(object):
             table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day3")}').input(
                 F'{float(henan_oms_data3[3])}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power_day3")}').input(
-                F'{henan_oms_data[4]}\ue007')
+                F'{henan_oms_data3[4]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power3")}').input(
-                F'{henan_oms_data[5]}\ue007')
+                F'{henan_oms_data3[5]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power3")}').input(
-                F'{int(henan_oms_data[6])}\ue007')
+                F'{henan_oms_data3[6]}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times3")}').input(
-                F'{int(henan_oms_data[7])}\ue007')
+                F'{int(henan_oms_data3[7])}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times3")}').input(
                 F'{int(henan_oms_data3[8])}\ue007')
             self.upload_button_cn(table0)
@@ -640,8 +854,6 @@ def close_chrome():
 
 if __name__ == '__main__':
     run_zz_jk_time()
-
-
 
     # print(F"自动化程序填报运行中,请勿关闭!")
     # # print(F"保佑,保佑,正常运行!")

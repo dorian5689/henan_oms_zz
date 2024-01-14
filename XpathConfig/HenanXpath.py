@@ -32,7 +32,7 @@ henan_ele_dict = {
     'report_load': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/div/span',
     # 点击收报负荷-机组日实际发电量
     'report_load_button_dl': 'x://*[@id="app"]/section/section/aside/div/div/div[1]/div/ul/div[2]/li/ul/div[1]/a/li/span',
-    # 上上报日期
+    # 上报日期
     'upload_date': 'x://*[@id="1$cell$2"]/div',
 
     # 发电量
@@ -66,7 +66,7 @@ henan_ele_dict = {
     # 储能日最大放电电力
     'store_energy_max_discharge_power_day3': 'x://*[@id="formtable"]/tbody/tr[13]/td[2]/span[1]/span/input',
     # 储能日充电量
-    'store_energy_day_charge_power3': 'x://*[@id="formtable"]/tbody/tr[6]/td[14]/span[1]/span/input',
+    'store_energy_day_charge_power3': 'x://*[@id="formtable"]/tbody/tr[14]/td[2]/span[1]/span[1]/input',
     # 储能日放电量
     'store_energy_day_discharge_power3': 'x://*[@id="formtable"]/tbody/tr[15]/td[2]/span[1]/span/input',
     # 储能日充电次数

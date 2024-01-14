@@ -42,7 +42,7 @@ class FindExeTools(object):
 
         '''
         PT = ProcessCure()
-        time.sleep(5)
+        time.sleep(3)
         PT.admin_kill_process(process_name)
 
         self.log.info(F'查找当前运行的{process_name},并结束进程')
@@ -61,22 +61,22 @@ class FindExeTools(object):
         if not  os.path.isfile(process_name):
             process_name = F'..{os.sep}ExeSoft{os.sep}iscpclient{os.sep}bin{os.sep}iscpclient.exe'
         subprocess.Popen(process_name)
-        time.sleep(3)
+        time.sleep(2)
         res = gw.getWindowsWithTitle('安全接入网关SDK')[0]
         res.maximize()
-        time.sleep(3)
+        time.sleep(1)
         try:
             self.click_button(self.moren_path)
             self.log.info(F'点击SDK默认按钮')
         except Exception as e:
             print(e,111)
-        time.sleep(3)
+        time.sleep(1)
         try:
             self.click_button(self.lianjie_path)
             self.log.info(F'SDK连接中')
         except Exception as e:
             print(e,112)
-        time.sleep(3)
+        time.sleep(1)
         # self.click_button(self.queren_path)
         # pag.press("enter")
         self.log.info(F'SDK确认中')
