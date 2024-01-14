@@ -17,14 +17,34 @@ father_path = os.path.dirname(os.getcwd())
 
 
 class Change_Uk_Info(object):
+
+    def __init__(self):
+        self.com_usb_index = 0
+
     def select_comports(self):
         import serial.tools.list_ports
 
         num_device = 0
-        for i in serial.tools.list_ports.comports():
+        index = 0
+        ls_com = serial.tools.list_ports.comports()
+        res = [str(i) for i in ls_com]
+        # 使用正则表达式提取COM口号码
+        import re
+
+        # 提取每个元素中的COM口号码
+
+        com_numbers = [re.search(r'\((COM\d+)\)', item).group(1) for item in res]
+
+        # 根据COM口号码排序并重新构建列表
+        sorted_res = ['{} - {}'.format('COM{}'.format(num), item)
+                      for num, item in sorted(zip(com_numbers, res))]
+
+        for i in sorted_res:
             i = str(i)
+            index += 1
             if 'USB' in i:
                 num_device = i[-2]
+                self.com_usb_index = index
         if num_device == 0:
             return
         return num_device
@@ -61,11 +81,10 @@ class Change_Uk_Info(object):
 
         # 保存包含标记的结果图像
         cv2.imwrite('result.png', screenshot)
-        if len(coordinates)>3:
+        if len(coordinates) > 3:
             return coordinates[-1]
         else:
             return coordinates[0]
-
 
     def select_use_device(self, ):
         from pynput.mouse import Controller
@@ -106,7 +125,7 @@ class Change_Uk_Info(object):
 
         # time.sleep(0.5)
         # 执行第一次左键单击，弹出下拉框选项
-        mouse.click(Button.left, 1)
+        # mouse.click(Button.left, 1)
 
         # use_comports_num_path = "images/use_comports_num_path.png"
         use_comports_num = self.select_comports()
@@ -124,34 +143,38 @@ class Change_Uk_Info(object):
         while True:
             # time.sleep(0.5)
             mouse.position = (drop_coor_x, drop_coor_y)
-            mouse.click(Button.left, 1)
-            # time.sleep(1)
-            try:
-                it_exist = self.find_icon_coordinates(use_comports_num_path)
-            except:
-                it_exist = ()
-
-            if flag == 10:
-                break
-
-            if it_exist:
-                mouse.position = (drop_coor_x, drop_coor_y)
-
-                # time.sleep(1)
-                mouse.click(Button.left, 1)
-                # time.sleep(1)
-                break
-
-            else:
-                drop_coor_new_y += 10
-                flag += 1
-                # print((drop_coor_x, drop_coor_new_y))
-                mouse.position = (drop_coor_x, drop_coor_new_y)
-
-                # time.sleep(2)
-                mouse.click(Button.left, 1)
-                # time.sleep(2)
-
+            # mouse.press(Button.left)
+            # mouse.click(Button.left, 1)
+            print(-self.com_usb_index)
+            mouse.scroll(0, -self.com_usb_index)
+            break
+            # time.sleep(20)
+            # try:
+            #     it_exist = self.find_icon_coordinates(use_comports_num_path)
+            # except:
+            #     it_exist = ()
+            #
+            # if flag == 10:
+            #     break
+            #
+            # if it_exist:
+            #     mouse.position = (drop_coor_x, drop_coor_y)
+            #
+            #     # time.sleep(1)
+            #     mouse.click(Button.left, 1)
+            #    #time.sleep(1)
+            #     break
+            #
+            # else:
+            #     drop_coor_new_y += 10
+            #     flag += 1
+            #     # print((drop_coor_x, drop_coor_new_y))
+            #     mouse.position = (drop_coor_x, drop_coor_new_y)
+            #
+            #     # time.sleep(2)
+            #     mouse.click(Button.left, 1)
+            #     # time.sleep(2)
+            # mouse.release(Button.left)
         # 移动鼠标到打开按钮上面
         mouse.position = (open_button_x, open_button_y)
         # time.sleep(0.5)
