@@ -461,7 +461,9 @@ class RunSxz(object):
                     F'发电量:{fdl}<br>上网电量:{swdl}<br>弃电量:{qdl}<br>',
             }
         }
+        # 测试电量专用
         # self.send_ding_dl_true_or_false(table0, message_dl=message_dl)
+        # pass
 
         if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
             self.send_ding_dl(table0)
@@ -472,6 +474,7 @@ class RunSxz(object):
             self.upload_button_dl(table0)
 
     def send_ding_dl(self, table0):
+        time.sleep(2)
         save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
         # 天润
@@ -537,6 +540,7 @@ class RunSxz(object):
         DATNLS.push_message(self.nls_token, message_cn3)
         DATNLS.send_file(F'{save_wind_wfname}', 0)
     def send_ding_cn(self, table0):
+        time.sleep(3)
         save_wind_wfname = self.save_pic(table0)
         from DingInfo.DingBotMix import DingApiTools
         # 天润
@@ -577,50 +581,8 @@ class RunSxz(object):
         # im.save(save_wind_wfname)
         return save_wind_wfname
 
-    def report_load_cn_00000(self, table0, henan_oms_data):
-        time.sleep(2)
-
-        # table0.ele(F'{henan_ele_dict.get("report_load")}').click()
-        table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
-        # todo 这里是测试储能数据是否准确
-        cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
-        cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
-        cnrcdl = henan_oms_data[5]# 储能日充电量
-        cnrfdl = henan_oms_data[6]#储能日放电量
-        cnrcdcs= henan_oms_data[7]#储能日充电次数
-        cnrfdcs = henan_oms_data[8]#储能日放电次数
-        message_cn = {
-            "msgtype": "markdown",
-            "markdown": {
-                "title": "OMS推送",
-                "text":
-                    F'第{self.wfname_id}个场站:{self.wfname}--已上报--储能--郑州集控<br>'
-                    F'储能日最大充电电力:{cnrzdcddl}<br>储能日放电量:{cnrzdfddl}<br>'
-                    F'储能日充电量:{cnrcdl}<br>储能日最大放电电力:{cnrfdl}<br>'
-                    F'储能日充电次数:{cnrcdcs}<br>储能日放电次数:{cnrfdcs}<br>'
-
-            }
-        }
-        # self.send_ding_cn_true_or_false(table0, message_cn=message_cn)
-        # if self.today_1 == table0.ele(F'{henan_ele_dict.get("upload_date")}').text:
-        #     time.sleep(5)
-        #     self.send_ding_cn(table0)
-        # else:
-        #     table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day")}').input(
-        #         F'{float(henan_oms_data[3])}\ue007')
-        #     table0.ele(F'{henan_ele_dict.get("store_energy_max_discharge_power_day")}').input(
-        #         F'{henan_oms_data[4]}\ue007')
-        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power")}').input(
-        #         F'{henan_oms_data[5]}\ue007')
-        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power")}').input(
-        #         F'{int(henan_oms_data[6])}\ue007')
-        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_charge_power_times")}').input(
-        #         F'{int(henan_oms_data[7])}\ue007')
-        #     table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
-        #         F'{int(henan_oms_data[8])}\ue007')
-        #     self.upload_button_cn(table0)
     def report_load_cn(self, table0, henan_oms_data):
-        time.sleep(2)
+        time.sleep(4)
 
         # table0.ele(F'{henan_ele_dict.get("report_load")}').click()
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
@@ -643,9 +605,11 @@ class RunSxz(object):
 
             }
         }
+        # #  测试储能专用
         # self.send_ding_cn_true_or_false(table0, message_cn=message_cn)
+        # pass
 
-        #
+        # #
         cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
         cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
         cnrcdl = henan_oms_data[5]# 储能日充电量
@@ -666,6 +630,7 @@ class RunSxz(object):
             F'{int(henan_oms_data[7])}\ue007')
         table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
             F'{int(henan_oms_data[8])}\ue007')
+        time.sleep(3)
         self.upload_button_cn(table0)
 
     def report_load_cn3(self, table0, henan_oms_data, henan_oms_data3):
@@ -707,6 +672,8 @@ class RunSxz(object):
 
             }
         }
+
+        # #  测试三期储能专用
         # self.send_ding_cn3_true_or_false(table0, message_cn3=message_cn3)
         # pass
 
@@ -728,7 +695,7 @@ class RunSxz(object):
                 F'{int(henan_oms_data[7])}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times")}').input(
                 F'{int(henan_oms_data[8])}\ue007')
-
+        #
             # 飞翔储能三期
 
             table0.ele(F'{henan_ele_dict.get("store_energy_max_charge_power_day3")}').input(
@@ -743,6 +710,7 @@ class RunSxz(object):
                 F'{int(henan_oms_data3[7])}\ue007')
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times3")}').input(
                 F'{int(henan_oms_data3[8])}\ue007')
+            time.sleep(3)
             self.upload_button_cn(table0)
 
     def upload_button(self, table0):
@@ -823,7 +791,7 @@ class RunSxz(object):
 
 
 def run_zz_jk_time():
-    for i in range(4):
+    for i in range(1):
         close_chrome()
         report_li = ReadyLogin().change_usbid()
         print(F'上报场站:{report_li}\n')
