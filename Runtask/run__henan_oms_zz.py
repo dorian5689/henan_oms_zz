@@ -261,6 +261,8 @@ class RunSxz(object):
                 except Exception as e:
                     pass
             time.sleep(5)
+            if self.username is None:
+                self.page.get(self.login)
             self.page(F'{henan_ele_dict.get("input_text")}').input(self.username)
             self.page(F'{henan_ele_dict.get("input_password")}').input(self.password)
             time.sleep(2)
@@ -556,6 +558,22 @@ class RunSxz(object):
 
         self.update_mysql()
 
+    def send_ding_cn3(self, table0):
+        time.sleep(3)
+        save_wind_wfname = self.save_pic(table0)
+        from DingInfo.DingBotMix import DingApiTools
+        # 天润
+        DAT = DingApiTools(appkey_value=self.appkey, appsecret_value=self.appsecret, chatid_value=self.chatid)
+        DAT.push_message(self.jf_token, self.message_cn)
+        DAT.send_file(F'{save_wind_wfname}', 0)
+
+        # 奈卢斯
+        DATNLS = DingApiTools(appkey_value=self.nls_appkey, appsecret_value=self.nls_appsecret,
+                              chatid_value=self.nls_chatid)
+        DATNLS.push_message(self.nls_token, self.message_cn)
+        DATNLS.send_file(F'{save_wind_wfname}', 0)
+
+        self.update_mysql3()
     def save_pic(self, table0):
         import os
         import shutil
@@ -586,6 +604,7 @@ class RunSxz(object):
 
         # table0.ele(F'{henan_ele_dict.get("report_load")}').click()
         table0.ele(F'{henan_ele_dict.get("report_load_button_cn")}').click()
+        time.sleep(2)
         # todo 这里是测试储能数据是否准确
         cnrzdcddl = henan_oms_data[3]# 储能日最大充电电力
         cnrzdfddl = henan_oms_data[4] # 储能日最大放电电力
@@ -711,7 +730,7 @@ class RunSxz(object):
             table0.ele(F'{henan_ele_dict.get("store_energy_day_discharge_power_times3")}').input(
                 F'{int(henan_oms_data3[8])}\ue007')
             time.sleep(3)
-            self.upload_button_cn(table0)
+            self.upload_button_cn3(table0)
 
     def upload_button(self, table0):
         try:
@@ -733,6 +752,15 @@ class RunSxz(object):
         time.sleep(5)
         self.send_ding_cn(table0)
 
+    def upload_button_cn3(self, table0):
+        self.upload_button(table0)
+        time.sleep(5)
+        self.send_ding_cn(table0)
+        try:
+            self.send_ding_cn3(table0)
+        except Exception as e:
+            pass
+
     def update_mysql(self):
 
         from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
@@ -747,6 +775,29 @@ class RunSxz(object):
         NEWMC = MysqlCurd(new_nanfang)
         print(NEWMC.query_sql())
         NEWMC.update(update_sql_success)
+    def update_mysql3(self):
+
+        from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
+        from datetime import datetime
+        # 获取当前时间
+        current_time = datetime.now()
+        # 格式化当前时间
+        end_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        update_sql_success = F"update   data_oms  set  是否已完成 =1 ,填报开始时间 = '{self.start_run_time}',填报结束时间 = '{end_run_time}' where   日期='{self.today_1}' and 电场名称='{self.wfname}'"
+
+        new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+        NEWMC = MysqlCurd(new_nanfang)
+        print(NEWMC.query_sql())
+        NEWMC.update(update_sql_success)
+        try:
+            fxsqcn = F'飞翔三期储能'
+            update_sql_success3 = F"update   data_oms  set  是否已完成 =1 ,填报开始时间 = '{self.start_run_time}',填报结束时间 = '{end_run_time}' where   日期='{self.today_1}' and 电场名称='{fxsqcn}'"
+            NEWMC.update(update_sql_success3)
+        except:
+            pass
+
+
+
 
     def henan_data(self):
         from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
@@ -825,7 +876,7 @@ if __name__ == '__main__':
 
     # print(F"自动化程序填报运行中,请勿关闭!")
     # # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("00:20").do(run_zz_jk_time)
+    # schedule.every().day.at("00:10").do(run_zz_jk_time)
     # schedule.every().day.at("00:40").do(run_zz_jk_time)
     # while True:
     #     schedule.run_pending()
