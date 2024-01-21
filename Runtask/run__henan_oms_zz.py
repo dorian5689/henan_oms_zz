@@ -103,11 +103,12 @@ class ReadyLogin(object):
             print(data_info,'11111111111111111111')
             for data in data_info:
                 print(data,'2222222')
-                if data is None:
-                    return
+
                 userid = int(data[0])
                 mac_address = data[1]
                 wfname = data[2]
+                if wfname is None:
+                    return
                 username = data[3]
                 password = data[4]
                 wfname_id = data[5]
@@ -848,10 +849,14 @@ class RunSxz(object):
 
 
 def run_zz_jk_time():
-    for i in range(2):
+    for i in range(5):
         close_chrome()
-        report_li = ReadyLogin().change_usbid()
-        print(F'上报场站:{report_li}\n')
+        try:
+            report_li = ReadyLogin().change_usbid()
+            print(F'上报场站:{report_li}\n')
+        except Exception as e:
+            print(F'程序异常,或者电脑卡住了,休息30S',{e})
+            time.sleep(30)
         # list1 = [i for i in range(1, 12)]
         #
         # # 将列表转换为集合
