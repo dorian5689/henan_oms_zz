@@ -88,7 +88,7 @@ class ReadyLogin(object):
             select_exit_true = F"SELECT 是否已完成 FROM data_oms where 电场名称='{data_info[0][2]}' AND 日期='{previous_day}'"
             res_exit_ture = MysqlCurd(new_nanfang).query_sql(select_exit_true)
             if res_exit_ture[0][0] == 1:
-                # print(F'已上报:{data_info[0][2]}')
+                print(F'已上报:{data_info[0][2]}')
                 report_li.append(data_info[0][5])
                 continue
             if res:
@@ -100,14 +100,14 @@ class ReadyLogin(object):
                 CU.radio_switch(f'{i}')
                 time.sleep(3)
                 res.minimize()
-            print(data_info,'11111111111111111111')
+            print(data_info, '11111111111111111111')
             for data in data_info:
-                print(data,'2222222')
+                print(data, '2222222')
 
                 userid = int(data[0])
                 mac_address = data[1]
                 wfname = data[2]
-                if wfname is None:
+                if wfname == '飞翔三期储能':
                     return
                 username = data[3]
                 password = data[4]
@@ -242,7 +242,7 @@ class RunSxz(object):
             # self.page.clear_cache(cookies=False)
             # time.sleep(2)
             time.sleep(1)
-            self.page.get(self.login,retry=2)
+            self.page.get(self.login, retry=2)
             time.sleep(3)
             # self.page.refresh()
             # self.page.wait
@@ -387,7 +387,7 @@ class RunSxz(object):
             self.page.wait
 
         henan_oms_data = self.henan_data()
-        time.sleep(6)
+        time.sleep(3)
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
         self.page.wait
         time.sleep(3)
@@ -430,7 +430,8 @@ class RunSxz(object):
     def exit_username_login(self):
         try:
             res = self.page.ele('x://*[@id="app"]/section/header/div/div[2]/div/div/span').click()
-        except:
+        except Exception as e:
+            print(F'退出用户失败{e}')
             return
 
         if res:
@@ -447,10 +448,11 @@ class RunSxz(object):
         table0.ele('x://*[@id="app"]/section/header/div/div[2]/div[1]/div/span').click()
         table0.ele('x://html/body/ul/li[4]/span').click()
         try:
-            table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
-            time.sleep(1)
-        except:
             table0.ele('x://html/body/div[28]/div/div[3]/button[2]/span').click()
+            time.sleep(1)
+        except Exception as e:
+            print(F'重新退出用户测试!--{e}')
+            table0.ele('x://html/body/div[23]/div/div[3]/button[2]/span').click()
             time.sleep(1)
 
         time.sleep(1)
@@ -855,7 +857,7 @@ def run_zz_jk_time():
             report_li = ReadyLogin().change_usbid()
             print(F'上报场站:{report_li}\n')
         except Exception as e:
-            print(F'程序异常,或者电脑卡住了,休息30S',{e})
+            print(F'程序异常,或者电脑卡住了,休息30S', {e})
             time.sleep(30)
         # list1 = [i for i in range(1, 12)]
         #
@@ -878,18 +880,19 @@ def close_chrome():
 
     try:
         page.quit()
-    except:
+    except Exception as e:
+        print(F'百度退出失败!{e}')
         pass
 
 
 if __name__ == '__main__':
-    run_zz_jk_time()
+    # run_zz_jk_time()
 
-    # print(F"自动化程序填报运行中,请勿关闭!")
-    # # print(F"保佑,保佑,正常运行!")
-    # schedule.every().day.at("00:10").do(run_zz_jk_time)
-    # schedule.every().day.at("00:40").do(run_zz_jk_time)
-    # while True:
-    #     schedule.run_pending()
-    #
-    #     time.sleep(1)
+    print(F"自动化程序填报运行中,请勿关闭!")
+    # print(F"保佑,保佑,正常运行!")
+    schedule.every().day.at("00:08").do(run_zz_jk_time)
+    schedule.every().day.at("00:40").do(run_zz_jk_time)
+    while True:
+        schedule.run_pending()
+
+        time.sleep(1)
