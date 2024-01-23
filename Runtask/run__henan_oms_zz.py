@@ -87,10 +87,15 @@ class ReadyLogin(object):
             # print("前一天的日期为：", previous_day)
             select_exit_true = F"SELECT 是否已完成 FROM data_oms where 电场名称='{data_info[0][2]}' AND 日期='{previous_day}'"
             res_exit_ture = MysqlCurd(new_nanfang).query_sql(select_exit_true)
+            print(res_exit_ture,9999999)
+            if res_exit_ture is None:
+                break
             if res_exit_ture[0][0] == 1:
                 print(F'已上报:{data_info[0][2]}')
                 report_li.append(data_info[0][5])
                 continue
+
+
             if res:
                 time.sleep(2)
                 res.maximize()
@@ -597,9 +602,10 @@ class RunSxz(object):
         img_path = Path(f"..{os.sep}Image{os.sep}save_wind{os.sep}{self.today_1}{os.sep}")
         directory = img_path.parent
 
-        if directory.exists():
+        if not directory.exists():
             # 如果目录存在且不为空，则递归删除整个目录及其内容
-            shutil.rmtree(directory)
+
+            # shutil.rmtree(directory)
             # 然后重新创建该目录
             directory.mkdir(parents=True, exist_ok=True)
 
@@ -854,6 +860,7 @@ def run_zz_jk_time():
     for i in range(5):
         close_chrome()
         try:
+
             report_li = ReadyLogin().change_usbid()
             print(F'上报场站:{report_li}\n')
         except Exception as e:
