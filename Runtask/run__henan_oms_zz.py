@@ -68,97 +68,100 @@ class ReadyLogin(object):
         from Config.ConfigUkUsb import henan_wfname_dict_num
         report_li = []
         for i, uuid in henan_wfname_dict_num.items():
-            from datetime import datetime
-            # 获取当前时间
-            current_time = datetime.now()
-            # 格式化当前时间
-            start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-            new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
-            slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码,wfname_id  from data_oms_uk  where usb序号='{i}' and uuid ='{uuid}'  "
+            try:
+                from datetime import datetime
+                # 获取当前时间
+                current_time = datetime.now()
+                # 格式化当前时间
+                start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+                slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码,wfname_id  from data_oms_uk  where usb序号='{i}' and uuid ='{uuid}'  "
 
-            data_info = MysqlCurd(new_nanfang).query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
-            import datetime
-            # 获取当前日期
-            current_date = datetime.date.today()
-            # print("当前日期为：", current_date)
+                data_info = MysqlCurd(new_nanfang).query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
+                import datetime
+                # 获取当前日期
+                current_date = datetime.date.today()
+                # print("当前日期为：", current_date)
 
-            # 将当前日期减去1天
-            previous_day = current_date - datetime.timedelta(days=1)
-            # print("前一天的日期为：", previous_day)
-            select_exit_true = F"SELECT 是否已完成 FROM data_oms where 电场名称='{data_info[0][2]}' AND 日期='{previous_day}'"
-            res_exit_ture = MysqlCurd(new_nanfang).query_sql(select_exit_true)
-            print(res_exit_ture,9999999)
-            if res_exit_ture is None:
-                break
-            if res_exit_ture[0][0] == 1:
-                print(F'已上报:{data_info[0][2]}')
-                report_li.append(data_info[0][5])
-                continue
-
-
-            if res:
-                time.sleep(2)
-                res.maximize()
-                time.sleep(1)
-                CU.all_button()
-                time.sleep(1)
-                CU.radio_switch(f'{i}')
-                time.sleep(3)
-                res.minimize()
-            print(data_info, '11111111111111111111')
-            for data in data_info:
-                print(data, '2222222')
-
-                userid = int(data[0])
-                mac_address = data[1]
-                wfname = data[2]
-                if wfname == '飞翔三期储能':
-                    return
-                username = data[3]
-                password = data[4]
-                wfname_id = data[5]
-
-                set_mac = SetMac()
-                new_mac = mac_address
-                set_mac.run(new_mac)
-                time.sleep(1)
-                try:
-                    FT = FindExeTools()
-                    FT.find_soft()
-                except Exception as e:
-                    print(F'没有点击SDK：{e}')
+                # 将当前日期减去1天
+                previous_day = current_date - datetime.timedelta(days=1)
+                # print("前一天的日期为：", previous_day)
+                select_exit_true = F"SELECT 是否已完成 FROM data_oms where 电场名称='{data_info[0][2]}' AND 日期='{previous_day}'"
+                res_exit_ture = MysqlCurd(new_nanfang).query_sql(select_exit_true)
+                print(res_exit_ture, 9999999)
+                if res_exit_ture is None:
                     break
-                time.sleep(3)
+                if res_exit_ture[0][0] == 1:
+                    print(F'已上报:{data_info[0][2]}')
+                    report_li.append(data_info[0][5])
+                    continue
 
-                try:
-                    from datetime import datetime
-                    # 获取当前时间
-                    current_time = datetime.now()
-                    # 格式化当前时间
-                    start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                if res:
+                    time.sleep(2)
+                    res.maximize()
+                    time.sleep(1)
+                    CU.all_button()
+                    time.sleep(1)
+                    CU.radio_switch(f'{i}')
+                    time.sleep(3)
+                    res.minimize()
+                print(data_info, '11111111111111111111')
+                for data in data_info:
+                    print(data, '2222222')
+
+                    userid = int(data[0])
+                    mac_address = data[1]
+                    wfname = data[2]
+                    if wfname == '飞翔三期储能':
+                        return
+                    username = data[3]
+                    password = data[4]
+                    wfname_id = data[5]
+
+                    set_mac = SetMac()
+                    new_mac = mac_address
+                    set_mac.run(new_mac)
+                    time.sleep(1)
                     try:
-                        RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
-                        print(F'当前运行场站:{wfname}')
-                        run_num = RB.run_sxz(userid)
-                        print(F'运行一次的值:{run_num}')
-                        if run_num == 1:
-                            report_li.append(userid)
-                            continue
+                        FT = FindExeTools()
+                        FT.find_soft()
                     except Exception as e:
-                        print(f'已经运行了一次{e}')
+                        print(F'没有点击SDK：{e}')
+                        break
+                    time.sleep(3)
 
+                    try:
+                        from datetime import datetime
+                        # 获取当前时间
+                        current_time = datetime.now()
+                        # 格式化当前时间
+                        start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+                        try:
+                            RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
+                            print(F'当前运行场站:{wfname}')
+                            run_num = RB.run_sxz(userid)
+                            print(F'运行一次的值:{run_num}')
+                            if run_num == 1:
+                                report_li.append(userid)
+                                continue
+                        except Exception as e:
+                            print(f'已经运行了一次{e}')
+
+                            pass
+                            # run_times = 0
+                            # for _ in range(3):
+                            #     RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
+                            #     run_num = RB.run_sxz(userid)
+                            #     if run_num < 1:
+                            #         run_times += 1
+                            #     if run_times > 3:
+                            #         return
+                    except Exception as e:
+                        print(F'主函数问题Q{e}')
                         pass
-                        # run_times = 0
-                        # for _ in range(3):
-                        #     RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
-                        #     run_num = RB.run_sxz(userid)
-                        #     if run_num < 1:
-                        #         run_times += 1
-                        #     if run_times > 3:
-                        #         return
-                except Exception as e:
-                    print(F'主函数问题Q')
-                    pass
+            except Exception as e:
+                print(F'{e}---这个场站异常,先跳过了！')
+                break
         return report_li
 
 
