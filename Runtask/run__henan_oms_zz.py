@@ -222,21 +222,21 @@ class RunSxz(object):
         user_name = os.getlogin()
 
         try:
-            co = ChromiumOptions()
+            co = ChromiumOptions().ignore_certificate_errors()
             co.set_argument("--start-maximized")
             page = ChromiumPage(co)
             return page
         except Exception as e:
             try:
                 browser_path = F'C:{os.sep}Users{os.sep}{user_name}{os.sep}AppData{os.sep}Local{os.sep}Google{os.sep}Chrome{os.sep}Application{os.sep}chrome.exe'
-                co = ChromiumOptions().set_paths(browser_path=browser_path)
+                co = ChromiumOptions().set_paths(browser_path=browser_path).ignore_certificate_errors()
                 co.set_argument("--start-maximized")
                 page = ChromiumPage(co)
                 return page
 
             except Exception as e:
                 browser_path = F'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
-                co = ChromiumOptions().set_paths(browser_path=browser_path)
+                co = ChromiumOptions().set_paths(browser_path=browser_path).ignore_certificate_errors()
                 co.set_argument("--start-maximized")
                 page = ChromiumPage(co)
                 # print(F"异常值:{e}")
