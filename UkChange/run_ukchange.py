@@ -27,7 +27,11 @@ class Change_Uk_Info(object):
         num_device = 0
         index = 0
         ls_com = serial.tools.list_ports.comports()
-        res = [str(i) for i in ls_com]
+        res = []
+        for i in ls_com:
+            res.append(str(i))
+
+        # res = [str(i) for i in ls_com]
         # 使用正则表达式提取COM口号码
         import re
 
@@ -51,7 +55,8 @@ class Change_Uk_Info(object):
 
     def find_icon_coordinates(self, image):
         # 加载要识别的图片
-        icon = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+        # icon = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+        icon = cv2.imdecode(np.fromfile(image, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
 
         # 创建 MSS (Media Source) 对象
         with mss.mss() as sct:
@@ -94,24 +99,33 @@ class Change_Uk_Info(object):
 
         # 打开按钮坐标
         # openbutton = F'../Image/uk_button/openbutton.png'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
 
-        openbutton = os.path.abspath(
-            father_path + os.path.sep + F'{os.sep}Image{os.sep}uk_button{os.sep}openbutton.png')
+        # 计算exe文件的绝对路径（假设你的.py文件和.exe文件在同一级目录的上两级）
+        openbutton = os.path.join(current_dir, '..', 'Image', 'uk_button', 'openbutton.png')
+        # openbutton = os.path.abspath(
+        #     father_path + os.path.sep + F'{os.sep}Image{os.sep}uk_button{os.sep}openbutton.png')
         # 当前文件的前两级目录
 
         # 调用函数并获取匹配坐标
+
         open_button_coor = self.find_icon_coordinates(openbutton)
+        print(22222222, open_button_coor)
+
         open_button_x = open_button_coor[0]
         open_button_y = open_button_coor[1]
 
         # 可用设备坐标
+
         use_device_path = os.path.abspath(
             father_path + os.path.sep + F'{os.sep}Image{os.sep}uk_button{os.sep}use_device_name.png')
+        use_device_path = os.path.join(current_dir, '..', 'Image', 'uk_button', 'use_device_name.png')
 
         # use_device_path = F'../Image/uk_button/use_device_name.png'
 
         # 调用函数并获取匹配坐标
         use_device_coor = self.find_icon_coordinates(use_device_path)
+
         # print(use_device_coor)
         use_device_coor_x = use_device_coor[0]
         use_device_coor_y = use_device_coor[1]
@@ -131,6 +145,8 @@ class Change_Uk_Info(object):
         use_comports_num = self.select_comports()
         use_comports_num_path = os.path.abspath(
             father_path + os.path.sep + F'{os.sep}Image{os.sep}uk_button{os.sep}port{os.sep}port_{use_comports_num}.png')
+        use_comports_num_path = os.path.join(current_dir, '..', 'Image', 'uk_button', 'port',
+                                             f'port_{use_comports_num}.png')
 
         # use_comports_num_path = F'../Image/uk_button/port/port_{use_comports_num}.png'
 
@@ -211,33 +227,69 @@ class Change_Uk_Info(object):
         #     pass
 
     def all_button(self):
+
         try:
             from pynput.mouse import Controller
 
             # 创建鼠标控制器
             mouse = Controller()
             # 全部关闭按钮
-            # off_all_button = F'../Image/uk_button/off_all.png'
-            off_all_button = os.path.abspath(
-                father_path + os.path.sep + F'{os.sep}Image{os.sep}uk_button{os.sep}off_all.png')
 
+            current_dir1 = os.path.dirname(os.path.abspath(__file__))
+            parent_dir2 = os.path.dirname(current_dir1)
+            off_all_button = os.path.join(parent_dir2, 'Image', 'uk_button', 'off_all.png')
             off_all_button_coor = self.find_icon_coordinates(off_all_button)
+
             off_all_button_x = off_all_button_coor[0]
             open_button_y = off_all_button_coor[1]
             # 移动鼠标到全部关闭按钮上面
             mouse.position = (off_all_button_x, open_button_y)
             # 左键单击按钮
             mouse.click(Button.left, 2)
+            print("全关")
 
-        except:
+        except Exception as e:
+            print(F"全部关闭失败{e}")
             pass
+
+    def double_click_image(self, image):
+
+        try:
+
+            while True:
+                import pyautogui
+                # 实时在屏幕上查找该模板
+                button_location = pyautogui.locateOnScreen(image)
+
+                if button_location is not None:
+                    # 获取到模板在屏幕上的坐标和尺寸（返回的是左上角坐标和宽度、高度）
+                    x, y, width, height = button_location
+
+                    # 考虑到点击中心点，调整x和y坐标
+                    center_x = x + width // 2
+                    center_y = y + height // 2
+                    print(center_x, center_y)
+                    # 移动鼠标到按钮中心并点击
+                    mouse.position = (center_x, center_y)
+                    mouse.click(Button.left, 2)
+
+                    break  # 找到并点击后退出循环
+            print("全关")
+            print("双击图片")
+            return 1
+        except Exception as e:
+            print(F"双击图片{e}")
+            return 0
 
     def radio_switch(self, num):
 
         try:
+
             radio_button = os.path.abspath(
                 father_path + os.path.sep + F'{os.sep}Image{os.sep}uk_button{os.sep}usb{os.sep}{num}.png')
+            current_dir = os.path.dirname(os.path.abspath(__file__))
 
+            radio_button = os.path.join(current_dir, '..', 'Image', 'uk_button', 'usb', f'{num}.png')
             # radio_button = F'../Image/uk_button/usb/{num}.png'
             # print(radio_button)
             # 调用函数并获取匹配坐标

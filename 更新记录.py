@@ -43,6 +43,27 @@
 不再运行程序切换
 
 """
+"""
+2024/2/5 0:58
+import sys
+import os
 
+# 获取当前脚本的绝对路径
+script_path = os.path.abspath(__file__)
+
+# 获取当前脚本的目录路径
+script_dir = os.path.dirname(script_path)
+
+# 获取当前脚本的父目录路径
+parent_dir = os.path.dirname(script_dir)
+
+# 将父目录添加到sys.path
+sys.path.append(parent_dir)
+
+# 现在你可以导入位于父目录下的模块了
+print("父目录已添加到sys.path")
+
+
+"""
 
 

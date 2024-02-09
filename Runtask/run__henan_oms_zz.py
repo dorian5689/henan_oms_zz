@@ -7,12 +7,17 @@
 @IDE ：PyCharm
 """
 
+
+
+
 import os
 import time
+import sys
 
 import schedule
 from DrissionPage import ChromiumPage
 from DrissionPage._configs.chromium_options import ChromiumOptions
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
 from FindSoft.Find_Exe import FindExeTools
@@ -28,16 +33,18 @@ from Config.ConfigUkUsb import henan_wfname_dict_num
 from ProcessInfo.ProcessTools import ProcessCure
 from UkChange.run_ukchange import Change_Uk_Info
 from DingInfo.DingBotMix import DingApiTools
-
+from LogInfo.LogTools import Logger
 
 class ReadyLogin(object):
 
     def __init__(self):
-        pass
+        self.logger = Logger()
 
     def select_uk(self):
         CU = Change_Uk_Info()
+
         list_port = CU.select_comports()
+
         if list_port is None:
             return None, None
         exe_path = F'..{os.sep}ExeSoft{os.sep}HUB_Control通用版{os.sep}HUB_Control通用版.exe'
@@ -46,9 +53,19 @@ class ReadyLogin(object):
         PT = ProcessCure()
         PT.admin_kill_process(process_name)
 
+        # 获取当前脚本所在目录
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # 计算exe文件的绝对路径（假设你的.py文件和.exe文件在同一级目录的上两级）
+        exe_path = os.path.join(current_dir, '..', 'ExeSoft', 'HUB_Control通用版', 'HUB_Control通用版.exe')
         import subprocess
+
+
         subprocess.Popen(exe_path)
+
         time.sleep(1)
+        print(1111111111111)
+
         CU.select_use_device()
 
         import pygetwindow as gw
@@ -74,7 +91,10 @@ class ReadyLogin(object):
                 current_time = datetime.now()
                 # 格式化当前时间
                 start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-                new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+
+                new_nanfang = os.path.join(current_dir, '..', 'DataBaseInfo', 'MysqlInfo', 'new_nanfang.yml')
+                print(new_nanfang)
                 slect_zhuangtai_sql = F"select  usb序号,UK密钥MAC地址,场站,外网oms账号,外网oms密码,wfname_id  from data_oms_uk  where usb序号='{i}' and uuid ='{uuid}'  "
 
                 data_info = MysqlCurd(new_nanfang).query_sql_return_header_and_data(slect_zhuangtai_sql).values.tolist()
@@ -125,6 +145,7 @@ class ReadyLogin(object):
                     try:
                         FT = FindExeTools()
                         FT.find_soft()
+                        self.logger.warning("qqqqqqqqqqq")
                     except Exception as e:
                         print(F'没有点击SDK：{e}')
                         break
@@ -138,7 +159,7 @@ class ReadyLogin(object):
                         start_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
                         try:
                             RB = RunSxz(username, password, wfname, userid, wfname_id, start_run_time)
-                            print(F'当前运行场站:{wfname}')
+                            self.logger.info(F'当前运行场站:{wfname}')
                             run_num = RB.run_sxz(userid)
                             print(F'运行一次的值:{run_num}')
                             if run_num == 1:
@@ -170,6 +191,8 @@ class RunSxz(object):
         """
         基于谷歌内核
         """
+        self.logger = Logger()
+
         self.username = username
         self.password = password
         self.wfname = wfname
@@ -326,7 +349,7 @@ class RunSxz(object):
         print(f"验证码:{cap_text}")
         # 验证码长度不等于5或者包含中文字符或者不包含大写字母再次运行
         if len(cap_text) == 5 and cap_text.isalnum() and cap_text.islower():
-            print(F'验证码有误:{cap_text}')
+            print(F'验证码正确:{cap_text}')
             return cap_text
         else:
             cap_text = self.send_code()
@@ -348,18 +371,32 @@ class RunSxz(object):
             return False
 
     def run_sxz(self, userid):
+
+
         cap_text = self.chrome_login_page(userid)
-        print(F'已经识别的验证码:{cap_text}')
+        self.logger.info(F'已经识别的验证码:{cap_text}')
+
         time.sleep(3)
         self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
         time.sleep(3)
         self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
         time.sleep(3)
         self.page.wait
-        for _ in range(3):
-            num_ = self.welcome_user()
-            if num_ == True:
-                continue
+        self.logger.info(F'000000000000')
+
+        # for _ in range(3):
+        #     num_ = self.welcome_user()
+        #     if num_ == True:
+        #         continue
+        if "欢迎登录" in self.page.html:
+            cap_text = self.send_code()
+            time.sleep(3)
+            self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
+            time.sleep(3)
+
+            self.page.ele(F'{henan_ele_dict.get("login_button")}').click()
+            time.sleep(3)
+            self.page.wait
 
             # 登录按钮
         if "验证码" in self.page.html:
@@ -393,10 +430,15 @@ class RunSxz(object):
             self.page.ele(F'{henan_ele_dict.get("capture_img_frame")}').input(cap_text)
             self.page.ele(F'{henan_ele_dict.get("login_button")}').click()  # 登录按钮
             self.page.wait
-
+        self.logger.info(F'henananhenan n')
         henan_oms_data = self.henan_data()
         time.sleep(3)
+        self.logger.info(F'已经取到数据库数据')
+
+        print(henan_oms_data,989898989)
         self.page.ele(F'{henan_ele_dict.get("oms_button")}').click()
+        self.logger.info(F'点击了OMS!!!!!!!!')
+
         self.page.wait
         time.sleep(3)
 
@@ -791,7 +833,9 @@ class RunSxz(object):
         end_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
         update_sql_success = F"update   data_oms  set  是否已完成 =1 ,填报开始时间 = '{self.start_run_time}',填报结束时间 = '{end_run_time}' where   日期='{self.today_1}' and 电场名称='{self.wfname}'"
 
-        new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        new_nanfang = os.path.join(current_dir, '..', 'DataBaseInfo', 'MysqlInfo', 'new_nanfang.yml')
         NEWMC = MysqlCurd(new_nanfang)
         print(NEWMC.query_sql())
         NEWMC.update(update_sql_success)
@@ -806,7 +850,9 @@ class RunSxz(object):
         end_run_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
         update_sql_success = F"update   data_oms  set  是否已完成 =1 ,填报开始时间 = '{self.start_run_time}',填报结束时间 = '{end_run_time}' where   日期='{self.today_1}' and 电场名称='{self.wfname}'"
 
-        new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        new_nanfang = os.path.join(current_dir, '..', 'DataBaseInfo', 'MysqlInfo', 'new_nanfang.yml')
         NEWMC = MysqlCurd(new_nanfang)
         print(NEWMC.query_sql())
         NEWMC.update(update_sql_success)
@@ -821,8 +867,14 @@ class RunSxz(object):
         from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
         from ReadExcle.HenanOmsConfig import henan_oms_config, henan_oms_config_new
 
-        new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        new_nanfang = os.path.join(current_dir, '..', 'DataBaseInfo', 'MysqlInfo', 'new_nanfang.yml')
+        
+        print(new_nanfang,101010101010101)
         NEWMC = MysqlCurd(new_nanfang)
+        print(new_nanfang,2020202020)
+
         df_oms = NEWMC.query_sql_return_header_and_data(henan_oms_config_new)
 
         time.sleep(1)
@@ -841,7 +893,9 @@ class RunSxz(object):
         from DataBaseInfo.MysqlInfo.MysqlTools import MysqlCurd
         from ReadExcle.HenanOmsConfig import henan_oms_config, henan_oms_config_new
 
-        new_nanfang = F'../DataBaseInfo/MysqlInfo/new_nanfang.yml'
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        new_nanfang = os.path.join(current_dir, '..', 'DataBaseInfo', 'MysqlInfo', 'new_nanfang.yml')
         NEWMC = MysqlCurd(new_nanfang)
         df_oms = NEWMC.query_sql_return_header_and_data(henan_oms_config_new)
 
@@ -861,7 +915,7 @@ class RunSxz(object):
 
 def run_zz_jk_time():
     for i in range(5):
-        close_chrome()
+        # close_chrome()
         try:
 
             report_li = ReadyLogin().change_usbid()
@@ -896,11 +950,11 @@ def close_chrome():
 
 
 if __name__ == '__main__':
-    # run_zz_jk_time()
+    run_zz_jk_time()
 
     print(F"自动化程序填报运行中,请勿关闭!")
-    # print(F"保佑,保佑,正常运行!")
-    schedule.every().day.at("00:08").do(run_zz_jk_time)
+    print(F"保佑,保佑,正常运行!")
+    schedule.every().day.at("00:12").do(run_zz_jk_time)
     schedule.every().day.at("00:40").do(run_zz_jk_time)
     while True:
         schedule.run_pending()
